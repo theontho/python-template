@@ -42,21 +42,13 @@ You are not done simply because you made an edit. **You are not done until you h
 - **Configuration:** Use TOML for configuration files stored in platform-standard directories (via `platformdirs`). Use Pydantic for validation.
 - **Global Tools:** Support global installation with `uv tool install .`.
 
-
 ## Python Formatting & Linting
 
 - **Always** run `uv run ruff check --fix {file_path}` and `uv run ruff format {file_path}` after editing a Python file.
 - **Always** run `uv run mypy {file_path}` (or `uv run mypy src/`) to check for type errors before concluding a task.
 
-## Use CLI tools if available
-
-- Instead of opening a browser and using playwright to browse github, use the gh cli tool.  If it's not installed or authenticated, then install and ask the user to login.  Do this with other tools if they are available to install / use.
 ## Dev Identity Verification
 
 This project uses a `.dev_id` file (gitignored) to ensure commits are made with the correct identity.
-1. Run `uv run python-template dev-register` to create your `.dev_id`.
-2. To enforce this, add the following to `.git/hooks/pre-commit` and `.git/hooks/pre-push`:
-   ```bash
-   #!/bin/bash
-   uv run python scripts/verify_dev.py
-   ```
+1. Run `uv run python scripts/dev_register.py` to create your `.dev_id`.
+2. Run `uv run python scripts/setup_hooks.py` to install git hooks.

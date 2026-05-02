@@ -23,18 +23,19 @@ A best-practice Python project template extracted from recent successful project
     uv run python-template precheck
     ```
 4.  **Initialize config:**
-7.  **Register dev identity:**
-    ```bash
-    uv run python-template dev-register
-    ```
     ```bash
     uv run python-template config init
     ```
-5.  **Run the application:**
+5.  **Setup Development Environment:**
+    ```bash
+    uv run python scripts/setup_hooks.py    # Install git hooks
+    uv run python scripts/dev_register.py   # Register your git identity
+    ```
+6.  **Run the application:**
     ```bash
     uv run python-template run
     ```
-6.  **Run tests:**
+7.  **Run tests:**
     ```bash
     uv run pytest
     ```
@@ -52,4 +53,3 @@ Configuration is stored in a platform-standard directory (e.g., `~/.config/pytho
 ```bash
 python-template config show
 ```
-
