@@ -18,23 +18,34 @@ A best-practice Python project template extracted from recent successful project
     ```bash
     uv sync
     ```
-3.  **Run the application:**
+3.  **Run pre-check:**
     ```bash
-    uv run python-template
+    uv run python-template precheck
     ```
-4.  **Run tests:**
+4.  **Initialize config:**
+    ```bash
+    uv run python-template config init
+    ```
+5.  **Run the application:**
+    ```bash
+    uv run python-template run
+    ```
+6.  **Run tests:**
     ```bash
     uv run pytest
     ```
 
-## Development
+## Global Installation
 
-- **Formatting:** `uv run ruff format .`
-- **Linting:** `uv run ruff check .`
-- **Type Checking:** `uv run mypy src`
-- **Scratch Space:** Use the `scratch/` directory for local experiments (gitignored).
-- **Temporary Output:** Use `tmp/` or `out/` for logs and artifacts (gitignored).
+You can install this template globally as a tool:
+```bash
+uv tool install .
+```
 
 ## Configuration
 
-Settings are managed in `pyproject.toml`.
+Configuration is stored in a platform-standard directory (e.g., `~/.config/python-template/config.toml` on macOS/Linux). You can view the current configuration with:
+```bash
+python-template config show
+```
+

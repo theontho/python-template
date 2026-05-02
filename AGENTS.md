@@ -37,7 +37,11 @@ You are not done simply because you made an edit. **You are not done until you h
   - *Interactive Mode:* Show progress bars using `tqdm`, `rich` or similar.
   - *Non-Interactive Mode:* Use simple logs with updates every 30-60 seconds.
 - **Structured Logging:** Use proper logging libraries (e.g., `logging` or `rich.logging`) with timestamps and log levels.
-- **Modern Best Practices:** Use "define the project with code" tooling: `pyproject.toml`, `uv`, `pixi`, etc.
+- **Modern Best Practices:** Use "define the project with code" tooling: `pyproject.toml`, `uv`, etc.
+- **CLI Design:** Use `argparse` for CLI tooling. Include `precheck` and `config` subcommands.
+- **Configuration:** Use TOML for configuration files stored in platform-standard directories (via `platformdirs`). Use Pydantic for validation.
+- **Global Tools:** Support global installation with `uv tool install .`.
+
 
 ## Python Formatting & Linting
 
