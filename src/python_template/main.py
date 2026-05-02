@@ -65,6 +65,30 @@ def handle_config(args: argparse.Namespace) -> None:
             log.info(f"Initialized default config at {config_path}")
 
 
+def handle_dev_register():
+    """Register dev identity in .dev_id."""
+    import subprocess
+    
+    def get_git_config(key):
+        try:
+            return subprocess.check_output(["git", "config", key]).decode().strip()
+        except subprocess.CalledProcessError:
+            return ""
+
+    current_name = get_git_config("user.name")
+    current_email = get_git_config("user.email")
+
+    print(f"Current Git Identity: {current_name} <{current_email}>")
+    confirm = input("Register this identity in .dev_id? (y/n): ")
+    if confirm.lower() == 'y':
+        with open(".dev_id", "w") as f:
+            f.write(f"name={current_name}\n")
+            f.write(f"email={current_email}\n")
+        print("✅ Registered in .dev_id")
+    else:
+        print("Registration cancelled.")
+
+
 def main() -> None:
     """Main entry point for the application."""
     parser = argparse.ArgumentParser(
@@ -89,6 +113,9 @@ def main() -> None:
         "--force", action="store_true", help="Force overwrite when initializing"
     )
 
+    # Dev Register subcommand
+    subparsers.add_parser("dev-register", help="Register your dev identity in .dev_id")
+
     # Example 'run' subcommand
     run_parser = subparsers.add_parser("run", help="Run the main application logic")
     run_parser.add_argument("--name", default="World", help="Name to greet")
@@ -105,6 +132,8 @@ def main() -> None:
             sys.exit(1)
     elif args.command == "config":
         handle_config(args)
+    elif args.command == "dev-register":
+        handle_dev_register()
     elif args.command == "run" or args.command is None:
         if args.command is None:
             log.info("No command specified, defaulting to 'run'")

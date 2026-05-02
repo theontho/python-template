@@ -23,6 +23,10 @@ A best-practice Python project template extracted from recent successful project
     uv run python-template precheck
     ```
 4.  **Initialize config:**
+7.  **Register dev identity:**
+    ```bash
+    uv run python-template dev-register
+    ```
     ```bash
     uv run python-template config init
     ```
