@@ -1,0 +1,74 @@
+[project]
+name = "python-template"
+version = "0.1.0"
+description = "Best-practice Python project template"
+readme = "README.md"
+requires-python = ">=3.12"
+authors = [
+    { name = "theontho", email = "22130+theontho@users.noreply.github.com" }
+]
+dependencies = [
+    "rich>=13.0.0",
+    "tqdm>=4.66.0",
+    "python-dotenv>=1.0.0",
+    "pydantic>=2.0.0",
+    "pydantic-settings>=2.0.0",
+]
+
+[project.scripts]
+python-template = "python_template.main:main"
+
+[dependency-groups]
+dev = [
+    "mypy>=1.0.0",
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "pytest-cov>=4.1.0",
+    "ruff>=0.3.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+package = true
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "B",  # flake8-bugbear
+    "C4", # flake8-comprehensions
+    "UP", # pyupgrade
+    "N",  # pep8-naming
+    "S",  # flake8-bandit
+]
+ignore = [
+    "E501", # line too long (handled by formatter)
+    "S101", # use of assert
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+ignore_missing_imports = true
+check_untyped_defs = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+pythonpath = ["src"]
+testpaths = ["tests"]
