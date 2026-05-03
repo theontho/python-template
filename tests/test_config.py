@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
-from python_template.config import AppConfig, get_config
+from python_template.config import AppConfig, ConfigLoadError, get_config
 
 
 def test_config_load_default(tmp_config_dir: Path) -> None:
@@ -47,6 +47,15 @@ def test_config_loads_toml_values(tmp_config_dir: Path) -> None:
     config = AppConfig.load()
     assert config.log_level == "WARNING"
     assert config.api_key == "file-key"
+
+
+def test_config_load_invalid_toml_has_actionable_error(tmp_config_dir: Path) -> None:
+    """Invalid TOML reports how to repair the config."""
+    config_path = tmp_config_dir / "config.toml"
+    config_path.write_text("log_level = [\n")
+
+    with pytest.raises(ConfigLoadError, match="config init --force"):
+        AppConfig.load()
 
 
 def test_get_config_singleton(tmp_config_dir: Path) -> None:

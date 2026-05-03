@@ -1,6 +1,7 @@
 import argparse
 import os
 import sys
+import tempfile
 from collections.abc import Iterable
 from pathlib import Path
 
@@ -35,10 +36,9 @@ def run_precheck() -> bool:
     try:
         config_dir = config_path.parent
         if config_dir.exists():
-            test_path = config_dir / ".write-test"
-            with test_path.open("w", encoding="utf-8"):
-                pass
-            test_path.unlink()
+            fd, test_path = tempfile.mkstemp(prefix=".write-test-", dir=config_dir)
+            os.close(fd)
+            Path(test_path).unlink(missing_ok=True)
             log.info(f"Config directory {config_dir} is writable")
         else:
             parent_dir = config_dir.parent

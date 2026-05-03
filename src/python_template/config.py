@@ -12,6 +12,10 @@ APP_AUTHOR = "theontho"
 LogLevel = Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 
 
+class ConfigLoadError(RuntimeError):
+    """Raised when config.toml cannot be loaded."""
+
+
 def get_config_dir() -> Path:
     """Get the standard user configuration directory for this app."""
     # Priority for macOS: Use ~/.config/APP_NAME/ if ~/.config exists
@@ -54,8 +58,14 @@ class AppConfig(BaseModel):
         data = {}
 
         if config_path.exists():
-            with config_path.open("rb") as f:
-                data = tomllib.load(f)
+            try:
+                with config_path.open("rb") as f:
+                    data = tomllib.load(f)
+            except (OSError, tomllib.TOMLDecodeError) as e:
+                raise ConfigLoadError(
+                    f"Could not load config from {config_path}: {e}. "
+                    "Run 'python-template config init --force' to replace it with defaults."
+                ) from e
 
         return cls(**data)
 
