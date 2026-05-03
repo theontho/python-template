@@ -9,9 +9,7 @@ authors = [
 ]
 dependencies = [
     "rich>=13.0.0",
-    "python-dotenv>=1.0.0",
     "pydantic>=2.0.0",
-    "pydantic-settings>=2.0.0",
     "platformdirs>=4.0.0",
     "tomli-w>=1.0.0",
 ]
@@ -25,6 +23,7 @@ package = true
 [dependency-groups]
 dev = [
     "mypy>=1.0.0",
+    "pre-commit>=4.0.0",
     "pytest>=8.0.0",
     "pytest-asyncio>=0.23.0",
     "pytest-cov>=4.1.0",
@@ -53,11 +52,11 @@ select = [
 ]
 ignore = [
     "E501", # line too long (handled by formatter)
-    "S101", # use of assert
 ]
 
 [tool.ruff.lint.per-file-ignores]
 "scripts/*" = ["S603", "S607"]
+"tests/*" = ["S101"]
 
 [tool.ruff.format]
 quote-style = "double"
@@ -74,5 +73,5 @@ check_untyped_defs = true
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
-pythonpath = ["src"]
+pythonpath = ["src", "."]
 testpaths = ["tests"]
