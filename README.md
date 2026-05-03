@@ -28,10 +28,9 @@ A best-practice Python project template extracted from recent successful project
     ```
 5.  **Setup Development Environment:**
     ```bash
-    uv run python scripts/dev_register.py   # Register your git identity
-    uv run python scripts/setup_hooks.py    # Install git hooks
+    make setup-dev
     ```
-    `dev_register.py` prefers the active `gh` account as the default identity when GitHub CLI is logged in. In non-interactive environments, it uses that default automatically. Use `--choice N` to select a specific listed identity. The script writes `.dev_id` and updates this repository's local `git config user.name` and `git config user.email` to match; pass `--no-update-git-config` to only write `.dev_id`.
+    This installs dependencies, registers your developer identity, and installs the Git hooks. `dev_register.py` prefers the active `gh` account as the default identity when GitHub CLI is logged in. In non-interactive environments, it uses that default automatically. Use `uv run python scripts/dev_register.py --choice N` to select a specific listed identity. The script writes `.dev_id` and updates this repository's local `git config user.name` and `git config user.email` to match; pass `--no-update-git-config` to only write `.dev_id`.
 6.  **Run the application:**
     ```bash
     uv run python-template run
@@ -69,3 +68,27 @@ Runtime overrides are available as CLI flags:
 ```bash
 python-template --log-level DEBUG --data-dir /tmp/python-template-data run
 ```
+
+## Git Hooks
+
+Git does not automatically install or run hooks from a cloned repository. This is an intentional safety boundary: hook scripts can execute arbitrary commands, so each developer must opt in locally.
+
+Install this repository's hooks with:
+```bash
+make setup-dev
+```
+
+After setup, `pre-commit` runs fast checks on commit and heavier checks on push. You can run them manually with:
+```bash
+uv run pre-commit run --all-files
+uv run pre-commit run --hook-stage pre-push --all-files
+```
+
+If you want `pre-commit` hooks installed automatically for future repositories you clone or create, opt in globally once:
+```bash
+uv tool install pre-commit
+pre-commit init-templatedir ~/.git-template
+git config --global init.templateDir ~/.git-template
+```
+
+That global template only affects future `git clone` and `git init` operations. Existing repositories still need `make setup-dev` or `uv run python scripts/setup_hooks.py` once.

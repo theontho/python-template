@@ -1,4 +1,9 @@
-.PHONY: lint format test typecheck clean
+.PHONY: setup-dev lint format test typecheck clean
+
+setup-dev:
+	uv sync --all-groups
+	uv run python scripts/dev_register.py
+	uv run python scripts/setup_hooks.py
 
 lint:
 	uv run ruff check .
