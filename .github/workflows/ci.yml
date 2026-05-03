@@ -28,10 +28,13 @@ jobs:
         run: uv run ruff format --check .
 
       - name: Lint (Ruff)
+        if: always()
         run: uv run ruff check .
 
       - name: Type Check (Mypy)
+        if: always()
         run: uv run mypy src
 
       - name: Run Tests (Pytest)
+        if: always()
         run: uv run pytest

@@ -1,12 +1,11 @@
 import argparse
 import sys
-from pathlib import Path
 
 from rich.console import Console
 from rich.table import Table
 
 from python_template.config import get_config, get_config_path
-from python_template.logging import setup_logging, get_logger
+from python_template.logging import get_logger, setup_logging
 
 # Initialize global console and logger
 console = Console()
@@ -71,9 +70,7 @@ def main() -> None:
         description="Best-practice Python project template CLI",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
-    parser.add_argument(
-        "--debug", action="store_true", help="Enable debug logging"
-    )
+    parser.add_argument("--debug", action="store_true", help="Enable debug logging")
 
     subparsers = parser.add_subparsers(dest="command", help="Subcommands")
 
@@ -82,9 +79,7 @@ def main() -> None:
 
     # Config subcommand
     config_parser = subparsers.add_parser("config", help="Manage configuration")
-    config_parser.add_argument(
-        "action", choices=["show", "init"], help="Config action to perform"
-    )
+    config_parser.add_argument("action", choices=["show", "init"], help="Config action to perform")
     config_parser.add_argument(
         "--force", action="store_true", help="Force overwrite when initializing"
     )
@@ -108,7 +103,7 @@ def main() -> None:
     elif args.command == "run" or args.command is None:
         if args.command is None:
             log.info("No command specified, defaulting to 'run'")
-        
+
         log.debug("Debug logging is enabled")
         log.info("Starting python-template...")
         name = getattr(args, "name", "World")

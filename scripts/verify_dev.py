@@ -2,11 +2,13 @@ import subprocess
 import sys
 from pathlib import Path
 
+
 def get_git_config(key):
     try:
         return subprocess.check_output(["git", "config", key]).decode().strip()
     except subprocess.CalledProcessError:
         return None
+
 
 def verify():
     dev_id_path = Path(".dev_id")
@@ -16,7 +18,7 @@ def verify():
         sys.exit(1)
 
     expected = {}
-    with open(dev_id_path, "r") as f:
+    with open(dev_id_path) as f:
         for line in f:
             if "=" in line:
                 k, v = line.split("=", 1)
@@ -39,6 +41,7 @@ def verify():
         sys.exit(1)
 
     print("✅ Git identity verified.")
+
 
 if __name__ == "__main__":
     verify()

@@ -1,16 +1,11 @@
 import sys
+import tomllib
 from pathlib import Path
-from typing import Optional
 
 import tomli_w
 from platformdirs import user_config_dir
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
-
-if sys.version_info >= (3, 11):
-    import tomllib
-else:
-    import tomli as tomllib
 
 APP_NAME = "python-template"
 APP_AUTHOR = "theontho"
@@ -44,7 +39,7 @@ class AppConfig(BaseSettings):
 
     log_level: str = Field(default="INFO", description="Logging level (DEBUG, INFO, etc.)")
     data_dir: Path = Field(default=Path("data"), description="Directory for data storage")
-    api_key: Optional[str] = Field(default=None, description="Optional API key")
+    api_key: str | None = Field(default=None, description="Optional API key")
 
     @classmethod
     def load(cls) -> "AppConfig":
@@ -73,7 +68,7 @@ class AppConfig(BaseSettings):
             tomli_w.dump(data, f)
 
 
-_config: Optional[AppConfig] = None
+_config: AppConfig | None = None
 
 
 def get_config(reload: bool = False) -> AppConfig:

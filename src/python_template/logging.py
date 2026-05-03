@@ -1,5 +1,4 @@
 import logging
-from typing import Optional
 
 from rich.logging import RichHandler
 
@@ -21,7 +20,7 @@ class EmojiFormatter(logging.Formatter):
         return super().format(record)
 
 
-def setup_logging(level: str = "INFO", log_file: Optional[str] = None) -> None:
+def setup_logging(level: str = "INFO", log_file: str | None = None) -> None:
     """
     Set up logging with format: [timestamp file:line] emoji message
     """
@@ -40,7 +39,9 @@ def setup_logging(level: str = "INFO", log_file: Optional[str] = None) -> None:
     # Format: [%(asctime)s %(filename)s:%(lineno)d] %(levelname)s %(message)s
     # Note: RichHandler will still handle the rich output, but with our custom structure
     rich_handler.setFormatter(
-        EmojiFormatter("[%(asctime)s %(filename)s:%(lineno)d] %(levelname)s %(message)s", datefmt="%X")
+        EmojiFormatter(
+            "[%(asctime)s %(filename)s:%(lineno)d] %(levelname)s %(message)s", datefmt="%X"
+        )
     )
     handlers.append(rich_handler)
 

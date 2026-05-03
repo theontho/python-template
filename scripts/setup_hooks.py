@@ -2,6 +2,7 @@ import os
 import stat
 from pathlib import Path
 
+
 def setup_hooks():
     git_dir = Path(".git")
     if not git_dir.exists():
@@ -20,11 +21,12 @@ uv run python scripts/verify_dev.py
         hook_path = hooks_dir / hook_name
         with open(hook_path, "w") as f:
             f.write(hook_content)
-        
+
         # Make executable
         st = os.stat(hook_path)
         os.chmod(hook_path, st.st_mode | stat.S_IEXEC)
         print(f"✅ Installed {hook_name} hook")
+
 
 if __name__ == "__main__":
     setup_hooks()
