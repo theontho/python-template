@@ -14,9 +14,7 @@ def tmp_config_dir(tmp_path: Path) -> Generator[Path, None, None]:
 
 
 @pytest.fixture
-def env_override() -> Generator[None, None, None]:
-    """Allow overriding environment variables for testing."""
-    old_env = dict(os.environ)
-    yield
-    os.environ.clear()
-    os.environ.update(old_env)
+def env_override(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Clean environment for testing."""
+    for key in list(os.environ):
+        monkeypatch.delenv(key, raising=False)

@@ -75,6 +75,7 @@ def main() -> None:
         "--version", action="version", version=f"%(prog)s {version('python-template')}"
     )
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")
+    parser.add_argument("--quiet", action="store_true", help="Suppress all output except errors")
 
     subparsers = parser.add_subparsers(dest="command", help="Subcommands")
 
