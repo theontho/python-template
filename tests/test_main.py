@@ -14,6 +14,18 @@ def test_precheck_passes(tmp_config_dir: Path) -> None:
     assert run_precheck() is True
 
 
+def test_precheck_quiet_suppresses_success_output(
+    capsys: pytest.CaptureFixture[str], tmp_config_dir: Path
+) -> None:
+    """Quiet precheck suppresses non-error status output."""
+    tmp_config_dir.mkdir(parents=True, exist_ok=True)
+
+    assert run_precheck(quiet=True) is True
+
+    captured = capsys.readouterr()
+    assert captured.out == ""
+
+
 def test_main_cli_help(capsys: pytest.CaptureFixture[str]) -> None:
     """Test that the CLI help works."""
     with patch.object(sys, "argv", ["python-template", "--help"]):
@@ -156,6 +168,17 @@ def test_main_quiet(capsys: pytest.CaptureFixture[str], tmp_config_dir: None) ->
     captured = capsys.readouterr()
     assert "Starting python-template..." not in captured.err
     assert "Hello, World" not in captured.out
+
+
+def test_main_quiet_precheck(capsys: pytest.CaptureFixture[str], tmp_config_dir: Path) -> None:
+    """Quiet mode suppresses precheck status output."""
+    tmp_config_dir.mkdir(parents=True, exist_ok=True)
+
+    with patch.object(sys, "argv", ["python-template", "--quiet", "precheck"]):
+        main()
+
+    captured = capsys.readouterr()
+    assert captured.out == ""
 
 
 def test_main_rich_markup_is_escaped(

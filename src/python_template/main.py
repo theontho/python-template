@@ -18,9 +18,10 @@ console = Console()
 log = get_logger("python-template")
 
 
-def run_precheck() -> bool:
+def run_precheck(quiet: bool = False) -> bool:
     """Check if the environment and dependencies are correctly set up."""
-    console.print("[bold blue]Running Pre-check...[/bold blue]")
+    if not quiet:
+        console.print("[bold blue]Running Pre-check...[/bold blue]")
     all_passed = True
 
     # Example check: Python version
@@ -28,7 +29,7 @@ def run_precheck() -> bool:
     if py_version.major < 3 or (py_version.major == 3 and py_version.minor < 12):
         log.error(f"Python 3.12+ required, found {sys.version}")
         all_passed = False
-    else:
+    elif not quiet:
         log.info(f"Python version {sys.version.split()[0]} OK")
 
     # Example check: Config directory writable
@@ -39,7 +40,8 @@ def run_precheck() -> bool:
             fd, test_path = tempfile.mkstemp(prefix=".write-test-", dir=config_dir)
             os.close(fd)
             Path(test_path).unlink(missing_ok=True)
-            log.info(f"Config directory {config_dir} is writable")
+            if not quiet:
+                log.info(f"Config directory {config_dir} is writable")
         else:
             parent_dir = config_dir.parent
             if (
@@ -47,7 +49,8 @@ def run_precheck() -> bool:
                 and parent_dir.is_dir()
                 and os.access(parent_dir, os.W_OK | os.X_OK)
             ):
-                log.info(f"Config directory parent {parent_dir} is writable")
+                if not quiet:
+                    log.info(f"Config directory parent {parent_dir} is writable")
             else:
                 log.error(f"Config directory parent {parent_dir} is not writable")
                 all_passed = False
@@ -55,6 +58,8 @@ def run_precheck() -> bool:
         log.error(f"Config directory {config_path.parent} is NOT writable: {e}")
         all_passed = False
 
+    if quiet:
+        return all_passed
     if all_passed:
         console.print("[bold green]Pre-check passed![/bold green]")
     else:
@@ -152,7 +157,7 @@ def main() -> None:
         setup_logging(level=log_level)
 
         if args.command == "precheck":
-            if not run_precheck():
+            if not run_precheck(quiet=args.quiet):
                 sys.exit(1)
         elif args.command == "config":
             handle_config(args, config)
