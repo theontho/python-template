@@ -1,22 +1,25 @@
-.PHONY: setup-dev lint format test typecheck clean
+.PHONY: precheck setup-dev lint format test typecheck clean
 
-setup-dev:
+precheck:
+	uv run python-template precheck
+
+setup-dev: precheck
 	uv sync --all-groups
 	uv run python scripts/dev_register.py
 	uv run python scripts/setup_hooks.py
 
-lint:
+lint: precheck
 	uv run ruff check .
 
-format:
+format: precheck
 	uv run ruff format .
 
-test:
+test: precheck
 	uv run pytest --cov=python_template --cov-report=term-missing
 
-typecheck:
+typecheck: precheck
 	uv run mypy src scripts
 
-clean:
+clean: precheck
 	rm -rf .pytest_cache .ruff_cache .mypy_cache .coverage htmlcov
 	find src tests scripts -type d -name "__pycache__" -exec rm -rf {} +
