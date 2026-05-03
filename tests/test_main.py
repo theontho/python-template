@@ -7,8 +7,9 @@ import pytest
 from python_template.main import main, run_precheck
 
 
-def test_precheck_passes() -> None:
+def test_precheck_passes(tmp_config_dir: Path) -> None:
     """Ensure the pre-check logic works."""
+    tmp_config_dir.mkdir(parents=True, exist_ok=True)
     # This should pass in the current environment
     assert run_precheck() is True
 
@@ -46,6 +47,21 @@ def test_main_config_show(capsys: pytest.CaptureFixture[str], tmp_config_dir: No
     assert "log_level" in captured.out
 
 
+def test_main_config_show_redacts_api_key(
+    capsys: pytest.CaptureFixture[str], tmp_config_dir: Path
+) -> None:
+    """Test 'config show' does not expose secret-like values."""
+    (tmp_config_dir / "config.toml").write_text('api_key = "secret-value"\n')
+
+    with patch.object(sys, "argv", ["python-template", "config", "show"]):
+        main()
+
+    captured = capsys.readouterr()
+    assert "api_key" in captured.out
+    assert "<redacted>" in captured.out
+    assert "secret-value" not in captured.out
+
+
 def test_main_run_greeting(capsys: pytest.CaptureFixture[str], tmp_config_dir: None) -> None:
     """Test the 'run' command with a custom name."""
     with patch.object(sys, "argv", ["python-template", "run", "--name", "Alice"]):
@@ -53,6 +69,26 @@ def test_main_run_greeting(capsys: pytest.CaptureFixture[str], tmp_config_dir: N
 
     captured = capsys.readouterr()
     assert "Hello, Alice" in captured.out
+
+
+def test_main_cli_overrides_config_data_dir(
+    capsys: pytest.CaptureFixture[str], tmp_config_dir: Path, tmp_path: Path
+) -> None:
+    """Command-line flags override config.toml values."""
+    configured_data_dir = tmp_path / "configured-data"
+    cli_data_dir = tmp_path / "cli-data"
+    (tmp_config_dir / "config.toml").write_text(f'data_dir = "{configured_data_dir}"\n')
+
+    with patch.object(
+        sys,
+        "argv",
+        ["python-template", "--data-dir", str(cli_data_dir), "run"],
+    ):
+        main()
+
+    captured = capsys.readouterr()
+    assert "cli-data" in captured.out
+    assert str(configured_data_dir) not in captured.out
 
 
 def test_main_config_init(tmp_config_dir: Path) -> None:
@@ -85,18 +121,79 @@ def test_main_config_init_force(tmp_config_dir: Path) -> None:
     assert "log_level" in config_path.read_text()
 
 
+def test_main_config_init_force_repairs_invalid_config(tmp_config_dir: Path) -> None:
+    """Force init can replace invalid TOML config."""
+    config_path = tmp_config_dir / "config.toml"
+    config_path.write_text("log_level = [\n")
+
+    with patch.object(sys, "argv", ["python-template", "config", "init", "--force"]):
+        main()
+
+    assert "log_level" in config_path.read_text()
+
+
+def test_main_config_init_honors_cli_overrides(tmp_config_dir: Path, tmp_path: Path) -> None:
+    """Config init writes command-line overrides, not environment values."""
+    data_dir = tmp_path / "configured-data"
+
+    with patch.object(
+        sys,
+        "argv",
+        ["python-template", "--log-level", "DEBUG", "--data-dir", str(data_dir), "config", "init"],
+    ):
+        main()
+
+    config_text = (tmp_config_dir / "config.toml").read_text()
+    assert 'log_level = "DEBUG"' in config_text
+    assert str(data_dir) in config_text
+
+
 def test_main_quiet(capsys: pytest.CaptureFixture[str], tmp_config_dir: None) -> None:
     """Test the --quiet flag."""
     with patch.object(sys, "argv", ["python-template", "--quiet", "run"]):
         main()
 
     captured = capsys.readouterr()
-    # In quiet mode, log.info won't print to console because level is ERROR.
-    # But console.print will still print.
-    # We can check if log messages are missing by looking at what was printed.
-    # log.info("Starting python-template...") should be missing.
     assert "Starting python-template..." not in captured.err
-    assert "Hello, World" in captured.out
+    assert "Hello, World" not in captured.out
+
+
+def test_main_rich_markup_is_escaped(
+    capsys: pytest.CaptureFixture[str], tmp_config_dir: None
+) -> None:
+    """User-provided values are rendered literally, not as Rich markup."""
+    with patch.object(sys, "argv", ["python-template", "run", "--name", "[red]Alice[/red]"]):
+        main()
+
+    captured = capsys.readouterr()
+    assert "[red]Alice[/red]" in captured.out
+    assert "Hello, Alice" not in captured.out
+
+
+def test_main_debug_overrides_config_log_level(
+    capsys: pytest.CaptureFixture[str], tmp_config_dir: Path
+) -> None:
+    """Debug flag overrides config.toml log level."""
+    (tmp_config_dir / "config.toml").write_text('log_level = "ERROR"\n')
+
+    with patch.object(sys, "argv", ["python-template", "--debug", "run"]):
+        main()
+
+    captured = capsys.readouterr()
+    assert "Debug logging is enabled" in captured.out
+
+
+def test_main_log_level_overrides_config(
+    capsys: pytest.CaptureFixture[str], tmp_config_dir: Path
+) -> None:
+    """Explicit log level flag overrides config.toml log level."""
+    (tmp_config_dir / "config.toml").write_text('log_level = "ERROR"\n')
+
+    with patch.object(sys, "argv", ["python-template", "--log-level", "DEBUG", "run"]):
+        main()
+
+    captured = capsys.readouterr()
+    assert "Debug logging is enabled" in captured.out
 
 
 def test_main_interrupt(capsys: pytest.CaptureFixture[str], tmp_config_dir: None) -> None:

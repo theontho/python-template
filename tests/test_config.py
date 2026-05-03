@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 
 import pytest
@@ -28,14 +27,26 @@ def test_config_save_and_load(tmp_config_dir: Path) -> None:
     assert loaded_config.api_key == "test-key"
 
 
-def test_config_env_override(tmp_config_dir: Path, env_override: None) -> None:
-    """Test environment variable overrides."""
-    os.environ["APP_LOG_LEVEL"] = "WARNING"
-    os.environ["APP_API_KEY"] = "env-key"
+def test_config_ignores_environment_variables(
+    tmp_config_dir: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Environment variables are not configuration sources."""
+    monkeypatch.setenv("APP_LOG_LEVEL", "WARNING")
+    monkeypatch.setenv("APP_API_KEY", "env-key")
+
+    config = AppConfig.load()
+    assert config.log_level == "INFO"
+    assert config.api_key is None
+
+
+def test_config_loads_toml_values(tmp_config_dir: Path) -> None:
+    """Test loading configuration from config.toml."""
+    config_path = tmp_config_dir / "config.toml"
+    config_path.write_text('log_level = "warning"\napi_key = "file-key"\n')
 
     config = AppConfig.load()
     assert config.log_level == "WARNING"
-    assert config.api_key == "env-key"
+    assert config.api_key == "file-key"
 
 
 def test_get_config_singleton(tmp_config_dir: Path) -> None:
@@ -51,12 +62,8 @@ def test_config_invalid_type(tmp_config_dir: Path) -> None:
         AppConfig(data_dir={"invalid": "type"})  # type: ignore
 
 
-def test_config_load_missing_file(tmp_config_dir: Path, env_override: None) -> None:
+def test_config_load_missing_file(tmp_config_dir: Path) -> None:
     """Test loading when the config file is missing."""
-    # Ensure environment variables are not interfering
-    if "APP_LOG_LEVEL" in os.environ:
-        del os.environ["APP_LOG_LEVEL"]
-    
     # Reload config to ensure we are testing the loading logic without cache
     get_config(reload=True)
     config_path = tmp_config_dir / "config.toml"

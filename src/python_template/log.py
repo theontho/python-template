@@ -1,3 +1,4 @@
+import copy
 import logging
 
 from rich.logging import RichHandler
@@ -15,9 +16,9 @@ class EmojiFormatter(logging.Formatter):
     }
 
     def format(self, record: logging.LogRecord) -> str:
-        # Replace the levelname with just the emoji
-        record.levelname = self.level_emojis.get(record.levelno, record.levelname)
-        return super().format(record)
+        record_copy = copy.copy(record)
+        record_copy.levelname = self.level_emojis.get(record.levelno, record.levelname)
+        return super().format(record_copy)
 
 
 def setup_logging(level: str = "INFO", log_file: str | None = None) -> None:

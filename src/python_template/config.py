@@ -1,14 +1,15 @@
 import sys
 import tomllib
 from pathlib import Path
+from typing import Any, Literal
 
 import tomli_w
 from platformdirs import user_config_dir, user_data_dir
-from pydantic import Field
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 APP_NAME = "python-template"
 APP_AUTHOR = "theontho"
+LogLevel = Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 
 
 def get_config_dir() -> Path:
@@ -27,35 +28,34 @@ def get_config_path() -> Path:
     return get_config_dir() / "config.toml"
 
 
-class AppConfig(BaseSettings):
-    """Application configuration managed by TOML file and environment variables."""
+class AppConfig(BaseModel):
+    """Application configuration managed by config.toml."""
 
-    model_config = SettingsConfigDict(
-        env_file=".env",
-        env_file_encoding="utf-8",
-        extra="ignore",
-        env_prefix="APP_",
-    )
+    model_config = ConfigDict(extra="ignore")
 
-    log_level: str = Field(default="INFO", description="Logging level (DEBUG, INFO, etc.)")
+    log_level: LogLevel = Field(default="INFO", description="Logging level")
     data_dir: Path = Field(
         default_factory=lambda: Path(user_data_dir(APP_NAME, APP_AUTHOR)),
         description="Directory for data storage",
     )
     api_key: str | None = Field(default=None, description="Optional API key")
 
+    @field_validator("log_level", mode="before")
+    @classmethod
+    def normalize_log_level(cls, value: Any) -> Any:
+        if isinstance(value, str):
+            return value.upper()
+        return value
+
     @classmethod
     def load(cls) -> "AppConfig":
-        """Load configuration from TOML file, then environment variables."""
+        """Load configuration from config.toml."""
         config_path = get_config_path()
         data = {}
 
         if config_path.exists():
-            try:
-                with open(config_path, "rb") as f:
-                    data = tomllib.load(f)
-            except Exception as e:
-                print(f"Warning: Error loading config from {config_path}: {e}", file=sys.stderr)
+            with config_path.open("rb") as f:
+                data = tomllib.load(f)
 
         return cls(**data)
 

@@ -10,8 +10,8 @@ test:
 	uv run pytest --cov=python_template --cov-report=term-missing
 
 typecheck:
-	uv run mypy src
+	uv run mypy src scripts
 
 clean:
 	rm -rf .pytest_cache .ruff_cache .mypy_cache .coverage htmlcov
-	find . -type d -name "__pycache__" -exec rm -rf {} +
+	find src tests scripts -type d -name "__pycache__" -exec rm -rf {} +
