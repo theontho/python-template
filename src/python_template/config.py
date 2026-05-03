@@ -3,7 +3,7 @@ import tomllib
 from pathlib import Path
 
 import tomli_w
-from platformdirs import user_config_dir
+from platformdirs import user_config_dir, user_data_dir
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -38,7 +38,10 @@ class AppConfig(BaseSettings):
     )
 
     log_level: str = Field(default="INFO", description="Logging level (DEBUG, INFO, etc.)")
-    data_dir: Path = Field(default=Path("data"), description="Directory for data storage")
+    data_dir: Path = Field(
+        default_factory=lambda: Path(user_data_dir(APP_NAME, APP_AUTHOR)),
+        description="Directory for data storage",
+    )
     api_key: str | None = Field(default=None, description="Optional API key")
 
     @classmethod
@@ -72,7 +75,12 @@ _config: AppConfig | None = None
 
 
 def get_config(reload: bool = False) -> AppConfig:
-    """Get the global application configuration."""
+    """
+    Get the global application configuration.
+
+    Note: This returns a global singleton. In multi-threaded or async contexts,
+    modifying this object may require additional synchronization.
+    """
     global _config
     if _config is None or reload:
         _config = AppConfig.load()

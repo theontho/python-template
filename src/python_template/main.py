@@ -1,11 +1,12 @@
 import argparse
 import sys
+from importlib.metadata import version
 
 from rich.console import Console
 from rich.table import Table
 
 from python_template.config import get_config, get_config_path
-from python_template.logging import get_logger, setup_logging
+from python_template.log import get_logger, setup_logging
 
 # Initialize global console and logger
 console = Console()
@@ -70,6 +71,9 @@ def main() -> None:
         description="Best-practice Python project template CLI",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
+    parser.add_argument(
+        "--version", action="version", version=f"%(prog)s {version('python-template')}"
+    )
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")
 
     subparsers = parser.add_subparsers(dest="command", help="Subcommands")
@@ -91,26 +95,33 @@ def main() -> None:
     args = parser.parse_args()
 
     # Load config and setup logging
-    config = get_config()
-    log_level = "DEBUG" if args.debug else config.log_level
-    setup_logging(level=log_level)
+    try:
+        config = get_config()
+        log_level = "DEBUG" if args.debug else config.log_level
+        setup_logging(level=log_level)
 
-    if args.command == "precheck":
-        if not run_precheck():
-            sys.exit(1)
-    elif args.command == "config":
-        handle_config(args)
-    elif args.command == "run" or args.command is None:
-        if args.command is None:
-            log.info("No command specified, defaulting to 'run'")
+        if args.command == "precheck":
+            if not run_precheck():
+                sys.exit(1)
+        elif args.command == "config":
+            handle_config(args)
+        elif args.command == "run" or args.command is None:
+            if args.command is None:
+                log.info("No command specified, defaulting to 'run'")
 
-        log.debug("Debug logging is enabled")
-        log.info("Starting python-template...")
-        name = getattr(args, "name", "World")
-        console.print(f"[bold green]Hello, {name} from python-template![/bold green]")
-        console.print(f"Data directory: [cyan]{config.data_dir}[/cyan]")
-    else:
-        parser.print_help()
+            log.debug("Debug logging is enabled")
+            log.info("Starting python-template...")
+            name = getattr(args, "name", "World")
+            console.print(f"[bold green]Hello, {name} from python-template![/bold green]")
+            console.print(f"Data directory: [cyan]{config.data_dir}[/cyan]")
+        else:
+            parser.print_help()
+    except KeyboardInterrupt:
+        console.print("\n[yellow]Interrupted by user.[/yellow]")
+        sys.exit(130)
+    except Exception as e:
+        log.exception(f"Fatal error: {e}")
+        sys.exit(1)
 
 
 if __name__ == "__main__":

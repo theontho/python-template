@@ -58,6 +58,7 @@ def setup_logging(level: str = "INFO", log_file: str | None = None) -> None:
         level=level.upper(),
         format="%(message)s",
         handlers=handlers,
+        force=True,
     )
 
     logging.getLogger("pydantic").setLevel(logging.WARNING)
