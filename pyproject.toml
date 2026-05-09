@@ -9,7 +9,7 @@ authors = [
 ]
 dependencies = [
     "rich>=13.0.0",
-    "pydantic>=2.0.0",
+    "pydantic>=2.13.4",
     "platformdirs>=4.0.0",
     "tomli-w>=1.0.0",
 ]
@@ -22,7 +22,7 @@ package = true
 
 [dependency-groups]
 dev = [
-    "mypy>=1.0.0",
+    "mypy>=2.0.0",
     "pre-commit>=4.0.0",
     "pytest>=8.0.0",
     "pytest-asyncio>=0.23.0",
